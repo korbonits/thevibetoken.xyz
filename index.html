@@ -137,6 +137,24 @@
       font-size: 0.8rem;
       color: #333;
     }
+
+    .swap-section {
+      margin-bottom: 3rem;
+    }
+
+    .swap-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #555;
+      margin-bottom: 1rem;
+      text-align: left;
+    }
+
+    #swap-container {
+      display: flex;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
@@ -161,6 +179,11 @@
       </div>
     </div>
 
+    <div class="swap-section">
+      <div class="swap-label">Swap</div>
+      <div id="swap-container"></div>
+    </div>
+
     <div class="actions">
       <a class="btn btn-primary" href="https://app.uniswap.org/swap?outputCurrency=0x4d5007d5717795331e8b21b3cd584f7bfe505926&chain=mainnet" target="_blank" rel="noopener">
         Buy on Uniswap
@@ -178,5 +201,15 @@
 
     <div class="footer">1,000,000 VIBE · 18 decimals · Verified open source</div>
   </div>
+  <script src="https://unpkg.com/@uniswap/widgets@latest/dist/index.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@uniswap/widgets@latest/dist/index.css" crossorigin="anonymous" />
+  <script>
+    const { SwapWidget } = UniswapWidgets;
+    const VIBE = "0x4d5007d5717795331e8b21b3cd584f7bfe505926";
+    SwapWidget.render(
+      { defaultOutputTokenAddress: VIBE, theme: { mode: "dark" } },
+      document.getElementById("swap-container")
+    );
+  </script>
 </body>
 </html>
