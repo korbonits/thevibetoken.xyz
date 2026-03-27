@@ -151,9 +151,12 @@
       text-align: left;
     }
 
-    #swap-container {
-      display: flex;
-      justify-content: center;
+    #swap-container iframe {
+      border: none;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      height: 360px;
     }
   </style>
 </head>
@@ -181,7 +184,12 @@
 
     <div class="swap-section">
       <div class="swap-label">Swap</div>
-      <div id="swap-container"></div>
+      <div id="swap-container">
+        <iframe
+          src="https://app.uniswap.org/swap?outputCurrency=0x4d5007d5717795331e8b21b3cd584f7bfe505926&chain=mainnet&theme=dark"
+          title="Swap VIBE on Uniswap"
+        ></iframe>
+      </div>
     </div>
 
     <div class="actions">
@@ -201,15 +209,5 @@
 
     <div class="footer">1,000,000 VIBE · 18 decimals · Verified open source</div>
   </div>
-  <script src="https://unpkg.com/@uniswap/widgets@2.27.7/dist/index.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://unpkg.com/@uniswap/widgets@2.27.7/dist/index.css" crossorigin="anonymous" />
-  <script>
-    const VIBE = "0x4d5007d5717795331e8b21b3cd584f7bfe505926";
-    const container = document.getElementById("swap-container");
-    UniswapWidgets.renderSwapWidget(container, {
-      defaultOutputTokenAddress: VIBE,
-      theme: UniswapWidgets.darkTheme,
-    });
-  </script>
 </body>
 </html>
