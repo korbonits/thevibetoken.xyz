@@ -201,15 +201,15 @@
 
     <div class="footer">1,000,000 VIBE · 18 decimals · Verified open source</div>
   </div>
-  <script src="https://unpkg.com/@uniswap/widgets@latest/dist/index.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="https://unpkg.com/@uniswap/widgets@latest/dist/index.css" crossorigin="anonymous" />
+  <script src="https://unpkg.com/@uniswap/widgets@2.27.7/dist/index.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@uniswap/widgets@2.27.7/dist/index.css" crossorigin="anonymous" />
   <script>
-    const { SwapWidget } = UniswapWidgets;
     const VIBE = "0x4d5007d5717795331e8b21b3cd584f7bfe505926";
-    SwapWidget.render(
-      { defaultOutputTokenAddress: VIBE, theme: { mode: "dark" } },
-      document.getElementById("swap-container")
-    );
+    const container = document.getElementById("swap-container");
+    UniswapWidgets.renderSwapWidget(container, {
+      defaultOutputTokenAddress: VIBE,
+      theme: UniswapWidgets.darkTheme,
+    });
   </script>
 </body>
 </html>
