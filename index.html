@@ -145,6 +145,37 @@
 
     .links a:hover { color: #e5e5e5; }
 
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: left;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #555;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #e5e5e5;
+    }
+
+    .stat-value.loading { color: #333; }
+
     .footer {
       margin-top: 4rem;
       font-size: 0.8rem;
@@ -164,6 +195,21 @@
       <p>VIBE is an ERC-20 token deployed to Ethereum mainnet in a single afternoon — hand-rolled in Solidity, no frameworks, no abstractions. The contract, the deployment scripts, and the Uniswap liquidity pool were all built from scratch as a learning exercise.</p>
       <br />
       <p>Every step is documented in <a href="https://korbonits.com/blog/2026-03-27-deploying-an-erc20-token" target="_blank" rel="noopener">this blog post</a>. The code is on <a href="https://github.com/korbonits/vibe-token" target="_blank" rel="noopener">GitHub</a>.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Price</div>
+        <div class="stat-value loading" id="stat-price">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Market Cap</div>
+        <div class="stat-value loading" id="stat-mcap">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Liquidity</div>
+        <div class="stat-value loading" id="stat-liquidity">—</div>
+      </div>
     </div>
 
     <div class="contract">
@@ -192,5 +238,53 @@
 
     <div class="footer">1,000,000 VIBE · 18 decimals · Verified open source</div>
   </div>
+  <script>
+    const VIBE = "0x4d5007d5717795331e8b21b3cd584f7bfe505926".toLowerCase();
+    const TOTAL_SUPPLY = 1_000_000;
+
+    // Uniswap v3 subgraph — public gateway (rate limited but fine for low traffic)
+    const SUBGRAPH_URL = "https://gateway.thegraph.com/api/public/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV";
+
+    const QUERY = `{
+      token(id: "${VIBE}") {
+        derivedETH
+        totalValueLockedUSD
+      }
+      bundle(id: "1") {
+        ethPriceUSD
+      }
+    }`;
+
+    async function loadStats() {
+      try {
+        const res = await fetch(SUBGRAPH_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query: QUERY }),
+        });
+        const { data } = await res.json();
+        if (!data?.token) return;
+
+        const ethPrice = parseFloat(data.bundle.ethPriceUSD);
+        const derivedETH = parseFloat(data.token.derivedETH);
+        const priceUSD = derivedETH * ethPrice;
+        const mcap = priceUSD * TOTAL_SUPPLY;
+        const liquidity = parseFloat(data.token.totalValueLockedUSD);
+
+        const fmt = (n, decimals = 2) =>
+          n < 0.01 ? n.toExponential(2) : n.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+
+        document.getElementById("stat-price").textContent = `$${fmt(priceUSD, 6)}`;
+        document.getElementById("stat-mcap").textContent = `$${fmt(mcap)}`;
+        document.getElementById("stat-liquidity").textContent = `$${fmt(liquidity)}`;
+
+        document.querySelectorAll(".stat-value").forEach(el => el.classList.remove("loading"));
+      } catch (e) {
+        console.error("Failed to load stats:", e);
+      }
+    }
+
+    loadStats();
+  </script>
 </body>
 </html>
