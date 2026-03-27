@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="100" fill="#0a0a0a"/>
+
+  <!-- Outer cube (large) — centered: front face 50,57 to 150,157, back face offset -8,-8 -->
+  <!-- Front face -->
+  <polygon points="50,60 150,60 150,155 50,155" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Back face (offset up-right) -->
+  <polygon points="65,45 165,45 165,140 65,140" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Connecting edges outer -->
+  <line x1="50" y1="60" x2="65" y2="45" stroke="#ffffff" stroke-width="2.5"/>
+  <line x1="150" y1="60" x2="165" y2="45" stroke="#ffffff" stroke-width="2.5"/>
+  <line x1="150" y1="155" x2="165" y2="140" stroke="#ffffff" stroke-width="2.5"/>
+  <line x1="50" y1="155" x2="65" y2="140" stroke="#ffffff" stroke-width="2.5"/>
+
+  <!-- Inner cube (small) — centered -->
+  <!-- Front face -->
+  <polygon points="75,85 125,85 125,130 75,130" fill="none" stroke="#888888" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Back face -->
+  <polygon points="83,77 133,77 133,122 83,122" fill="none" stroke="#888888" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Connecting edges inner -->
+  <line x1="75" y1="85" x2="83" y2="77" stroke="#888888" stroke-width="1.5"/>
+  <line x1="125" y1="85" x2="133" y2="77" stroke="#888888" stroke-width="1.5"/>
+  <line x1="125" y1="130" x2="133" y2="122" stroke="#888888" stroke-width="1.5"/>
+  <line x1="75" y1="130" x2="83" y2="122" stroke="#888888" stroke-width="1.5"/>
+
+  <!-- Tesseract connecting edges (outer cube to inner cube) -->
+  <line x1="50" y1="60" x2="75" y2="85" stroke="#444444" stroke-width="1"/>
+  <line x1="150" y1="60" x2="125" y2="85" stroke="#444444" stroke-width="1"/>
+  <line x1="150" y1="155" x2="125" y2="130" stroke="#444444" stroke-width="1"/>
+  <line x1="50" y1="155" x2="75" y2="130" stroke="#444444" stroke-width="1"/>
+  <line x1="65" y1="45" x2="83" y2="77" stroke="#444444" stroke-width="1"/>
+  <line x1="165" y1="45" x2="133" y2="77" stroke="#444444" stroke-width="1"/>
+  <line x1="165" y1="140" x2="133" y2="122" stroke="#444444" stroke-width="1"/>
+  <line x1="65" y1="140" x2="83" y2="122" stroke="#444444" stroke-width="1"/>
+</svg>
