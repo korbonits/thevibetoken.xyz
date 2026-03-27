@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VIBE Token</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: #0a0a0a;
+      color: #e5e5e5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .symbol {
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .tagline {
+      font-size: 1.1rem;
+      color: #888;
+      margin-bottom: 3rem;
+      line-height: 1.6;
+    }
+
+    .description {
+      font-size: 1rem;
+      color: #aaa;
+      line-height: 1.7;
+      margin-bottom: 3rem;
+      text-align: left;
+    }
+
+    .description a {
+      color: #e5e5e5;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .contract {
+      background: #141414;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 2rem;
+      text-align: left;
+    }
+
+    .contract-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #555;
+      margin-bottom: 0.4rem;
+    }
+
+    .contract-address {
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.85rem;
+      color: #aaa;
+      word-break: break-all;
+    }
+
+    .contract-address a {
+      color: #aaa;
+      text-decoration: none;
+    }
+
+    .contract-address a:hover {
+      color: #fff;
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.8; }
+
+    .btn-primary {
+      background: #fff;
+      color: #0a0a0a;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #e5e5e5;
+      border: 1px solid #333;
+    }
+
+    .links {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .links a {
+      color: #555;
+      text-decoration: none;
+    }
+
+    .links a:hover { color: #e5e5e5; }
+
+    .footer {
+      margin-top: 4rem;
+      font-size: 0.8rem;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="symbol">VIBE</div>
+    <p class="tagline">A token built in public to document how Ethereum actually works.</p>
+
+    <div class="description">
+      <p>No promises. No roadmap. No whitepaper.</p>
+      <br />
+      <p>VIBE is an ERC-20 token deployed to Ethereum mainnet in a single afternoon — hand-rolled in Solidity, no frameworks, no abstractions. The contract, the deployment scripts, and the Uniswap liquidity pool were all built from scratch as a learning exercise.</p>
+      <br />
+      <p>Every step is documented in <a href="https://korbonits.com/blog/2026-03-27-deploying-an-erc20-token" target="_blank" rel="noopener">this blog post</a>. The code is on <a href="https://github.com/korbonits/vibe-token" target="_blank" rel="noopener">GitHub</a>.</p>
+    </div>
+
+    <div class="contract">
+      <div class="contract-label">Contract Address (Ethereum Mainnet)</div>
+      <div class="contract-address">
+        <a href="https://etherscan.io/address/0x4d5007d5717795331e8b21b3cd584f7bfe505926#code" target="_blank" rel="noopener">
+          0x4d5007d5717795331e8b21b3cd584f7bfe505926
+        </a>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-primary" href="https://app.uniswap.org/swap?outputCurrency=0x4d5007d5717795331e8b21b3cd584f7bfe505926&chain=mainnet" target="_blank" rel="noopener">
+        Buy on Uniswap
+      </a>
+      <a class="btn btn-secondary" href="https://korbonits.com/blog/2026-03-27-deploying-an-erc20-token" target="_blank" rel="noopener">
+        Read the post
+      </a>
+    </div>
+
+    <div class="links">
+      <a href="https://github.com/korbonits/vibe-token" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/korbonits" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://etherscan.io/address/0x4d5007d5717795331e8b21b3cd584f7bfe505926#code" target="_blank" rel="noopener">Etherscan</a>
+    </div>
+
+    <div class="footer">1,000,000 VIBE · 18 decimals · Verified open source</div>
+  </div>
+</body>
+</html>
