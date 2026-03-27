@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
+  <rect width="1200" height="630" fill="#0a0a0a"/>
+  <rect x="1" y="1" width="1198" height="628" fill="none" stroke="#222" stroke-width="2"/>
+  <text x="600" y="280" font-family="-apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif" font-size="140" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="-4">VIBE</text>
+  <text x="600" y="370" font-family="-apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif" font-size="32" fill="#888888" text-anchor="middle">A token built in public to document how Ethereum actually works.</text>
+  <text x="600" y="560" font-family="SF Mono, Fira Code, monospace" font-size="22" fill="#444444" text-anchor="middle">0x4d5007d5717795331e8b21b3cd584f7bfe505926</text>
+</svg>
