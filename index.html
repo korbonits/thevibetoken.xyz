@@ -183,6 +183,61 @@
       color: #333;
     }
 
+    .transfers {
+      margin-bottom: 3rem;
+      text-align: left;
+    }
+
+    .transfers-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #555;
+      margin-bottom: 0.75rem;
+    }
+
+    .transfer-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #181818;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.8rem;
+      color: #888;
+    }
+
+    .transfer-row:last-child { border-bottom: none; }
+
+    .transfer-from, .transfer-to {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .transfer-arrow { color: #333; flex-shrink: 0; }
+
+    .transfer-amount {
+      color: #e5e5e5;
+      flex-shrink: 0;
+      text-align: right;
+      min-width: 90px;
+    }
+
+    .transfer-badge {
+      font-size: 0.65rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .badge-mint  { background: #0d2b1a; color: #3fb97a; }
+    .badge-burn  { background: #2b0d0d; color: #e05c5c; }
+    .badge-tx    { background: #141414; color: #555; }
+
+    .transfers-empty { color: #333; font-size: 0.85rem; }
+
   </style>
 </head>
 <body>
@@ -240,6 +295,11 @@
       <a href="https://github.com/korbonits/vibe-token" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.linkedin.com/in/korbonits" target="_blank" rel="noopener">LinkedIn</a>
       <a href="https://etherscan.io/address/0x4d5007d5717795331e8b21b3cd584f7bfe505926#code" target="_blank" rel="noopener">Etherscan</a>
+    </div>
+
+    <div class="transfers">
+      <div class="transfers-label">Recent Transfers</div>
+      <div id="transfers-list"><span class="transfers-empty">Loading...</span></div>
     </div>
 
     <div class="footer">1,000,000 VIBE · 18 decimals · Verified open source</div>
@@ -309,7 +369,77 @@
       }
     }
 
+    // Transfer(address indexed from, address indexed to, uint256 value)
+    const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
+    const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
+
+    function shorten(addr) {
+      return addr.slice(0, 6) + "…" + addr.slice(-4);
+    }
+
+    async function loadTransfers() {
+      try {
+        // Get current block, then fetch logs from last ~7 days (~50,000 blocks)
+        const blockRes = await fetch(RPC, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 2, method: "eth_blockNumber", params: [] }),
+        });
+        const { result: blockHex } = await blockRes.json();
+        const fromBlock = "0x" + (BigInt(blockHex) - 50000n).toString(16);
+
+        const logsRes = await fetch(RPC, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0", id: 3, method: "eth_getLogs",
+            params: [{ address: VIBE, topics: [TRANSFER_TOPIC], fromBlock, toBlock: "latest" }],
+          }),
+        });
+        const { result: logs } = await logsRes.json();
+
+        const list = document.getElementById("transfers-list");
+        if (!logs || logs.length === 0) {
+          list.innerHTML = '<span class="transfers-empty">No recent transfers.</span>';
+          return;
+        }
+
+        // Show newest first, cap at 20
+        const recent = [...logs].reverse().slice(0, 20);
+
+        list.innerHTML = recent.map(log => {
+          const from = "0x" + log.topics[1].slice(-40);
+          const to   = "0x" + log.topics[2].slice(-40);
+          const amt  = Number(BigInt("0x" + log.data.slice(2))) / 1e18;
+          const fmtAmt = amt < 0.01 ? amt.toExponential(2) : amt.toLocaleString("en-US", { maximumFractionDigits: 2 });
+          const txUrl = `https://etherscan.io/tx/${log.transactionHash}`;
+
+          let badge, label;
+          if (from === ZERO_ADDR) {
+            badge = '<span class="transfer-badge badge-mint">mint</span>';
+            label = `to ${shorten(to)}`;
+          } else if (to === ZERO_ADDR) {
+            badge = '<span class="transfer-badge badge-burn">burn</span>';
+            label = `from ${shorten(from)}`;
+          } else {
+            badge = '<span class="transfer-badge badge-tx">tx</span>';
+            label = `${shorten(from)} <span class="transfer-arrow">→</span> ${shorten(to)}`;
+          }
+
+          return `<div class="transfer-row">
+            ${badge}
+            <span class="transfer-from">${label}</span>
+            <a class="transfer-amount" href="${txUrl}" target="_blank" rel="noopener" style="text-decoration:none;color:#e5e5e5;">${fmtAmt} VIBE</a>
+          </div>`;
+        }).join("");
+      } catch (e) {
+        console.error("Failed to load transfers:", e);
+      }
+    }
+
     loadStats();
+    loadTransfers();
+    setInterval(loadTransfers, 30_000);
   </script>
 </body>
 </html>
