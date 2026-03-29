@@ -245,29 +245,64 @@
     <div class="footer">1,000,000 VIBE · 18 decimals · Verified open source</div>
   </div>
   <script>
-    const VIBE = "0x4d5007d5717795331e8b21b3cd584f7bfe505926";
+    const VIBE    = "0x4d5007d5717795331e8b21b3cd584f7bfe505926";
+    const WETH    = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
+    const FACTORY = "0x1f98431c8ad98523631ae4a59f267346ea31f984"; // Uniswap v3 factory
+    const CHAINLINK_ETH_USD = "0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419";
+    const RPC     = "https://eth.llamarpc.com";
+    const TOTAL_SUPPLY = 1_000_000;
+
+    function pad32(hex) {
+      return hex.replace(/^0x/i, "").toLowerCase().padStart(64, "0");
+    }
+
+    async function ethCall(to, data) {
+      const res = await fetch(RPC, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to, data }, "latest"] }),
+      });
+      const { result } = await res.json();
+      return result;
+    }
 
     async function loadStats() {
       try {
-        const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${VIBE}`);
-        const { pairs } = await res.json();
-        // Pick the mainnet Uniswap v3 VIBE/WETH pair with the most liquidity
-        const pair = pairs
-          ?.filter(p => p.chainId === "ethereum")
-          .sort((a, b) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0))[0];
-        if (!pair) return;
+        // 1. Get pool address — getPool(address,address,uint24) selector 0x1698ee82
+        // VIBE (0x4d…) < WETH (0xc0…), so VIBE is token0
+        const poolResult = await ethCall(FACTORY,
+          "0x1698ee82" + pad32(VIBE) + pad32(WETH) + pad32("0xbb8")); // fee=3000
+        const poolAddress = "0x" + poolResult.slice(-40);
+        if (poolAddress === "0x0000000000000000000000000000000000000000") return;
 
-        const priceUSD = parseFloat(pair.priceUsd);
-        const mcap = pair.fdv ?? pair.marketCap ?? null;
-        const liquidity = pair.liquidity?.usd ?? null;
+        // 2. Parallel: slot0, ETH/USD price feed, token balances
+        const [slot0, chainlink, wethBal, vibeBal] = await Promise.all([
+          ethCall(poolAddress, "0x3850c7bd"),                        // slot0()
+          ethCall(CHAINLINK_ETH_USD, "0xfeaf968c"),                  // latestRoundData()
+          ethCall(WETH, "0x70a08231" + pad32(poolAddress)),          // balanceOf(pool)
+          ethCall(VIBE, "0x70a08231" + pad32(poolAddress)),          // balanceOf(pool)
+        ]);
 
-        const fmt = (n, decimals = 2) =>
-          n < 0.01 ? n.toExponential(2) : n.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        // sqrtPriceX96 = first 32 bytes of slot0
+        const sqrtPriceX96 = BigInt("0x" + slot0.slice(2, 66));
+        // price = (sqrtPriceX96/2^96)^2 = WETH per VIBE (both 18 dec, cancel out)
+        const priceETH = Number(sqrtPriceX96 * sqrtPriceX96 * 10n ** 18n / 2n ** 192n) / 1e18;
 
-        document.getElementById("stat-price").textContent = `$${fmt(priceUSD, 6)}`;
-        document.getElementById("stat-mcap").textContent = mcap != null ? `$${fmt(mcap)}` : "—";
-        document.getElementById("stat-liquidity").textContent = liquidity != null ? `$${fmt(liquidity)}` : "—";
+        // Chainlink answer is 2nd 32-byte word (offset 32), 8 decimals
+        const ethUSD = Number(BigInt("0x" + chainlink.slice(66, 130))) / 1e8;
 
+        const priceUSD  = priceETH * ethUSD;
+        const mcap      = priceUSD * TOTAL_SUPPLY;
+        const wethInPool = Number(BigInt("0x" + wethBal.slice(2))) / 1e18;
+        const vibeInPool = Number(BigInt("0x" + vibeBal.slice(2))) / 1e18;
+        const liquidity = wethInPool * ethUSD + vibeInPool * priceUSD;
+
+        const fmt = (n, d = 2) =>
+          n < 0.01 ? n.toExponential(2) : n.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+
+        document.getElementById("stat-price").textContent     = `$${fmt(priceUSD, 6)}`;
+        document.getElementById("stat-mcap").textContent      = `$${fmt(mcap)}`;
+        document.getElementById("stat-liquidity").textContent = `$${fmt(liquidity)}`;
         document.querySelectorAll(".stat-value").forEach(el => el.classList.remove("loading"));
       } catch (e) {
         console.error("Failed to load stats:", e);
