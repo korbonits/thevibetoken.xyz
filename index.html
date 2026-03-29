@@ -245,44 +245,28 @@
     <div class="footer">1,000,000 VIBE · 18 decimals · Verified open source</div>
   </div>
   <script>
-    const VIBE = "0x4d5007d5717795331e8b21b3cd584f7bfe505926".toLowerCase();
-    const TOTAL_SUPPLY = 1_000_000;
-
-    // Uniswap v3 subgraph — public gateway (rate limited but fine for low traffic)
-    const SUBGRAPH_URL = "https://gateway.thegraph.com/api/public/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV";
-
-    const QUERY = `{
-      token(id: "${VIBE}") {
-        derivedETH
-        totalValueLockedUSD
-      }
-      bundle(id: "1") {
-        ethPriceUSD
-      }
-    }`;
+    const VIBE = "0x4d5007d5717795331e8b21b3cd584f7bfe505926";
 
     async function loadStats() {
       try {
-        const res = await fetch(SUBGRAPH_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query: QUERY }),
-        });
-        const { data } = await res.json();
-        if (!data?.token) return;
+        const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${VIBE}`);
+        const { pairs } = await res.json();
+        // Pick the mainnet Uniswap v3 VIBE/WETH pair with the most liquidity
+        const pair = pairs
+          ?.filter(p => p.chainId === "ethereum")
+          .sort((a, b) => (b.liquidity?.usd ?? 0) - (a.liquidity?.usd ?? 0))[0];
+        if (!pair) return;
 
-        const ethPrice = parseFloat(data.bundle.ethPriceUSD);
-        const derivedETH = parseFloat(data.token.derivedETH);
-        const priceUSD = derivedETH * ethPrice;
-        const mcap = priceUSD * TOTAL_SUPPLY;
-        const liquidity = parseFloat(data.token.totalValueLockedUSD);
+        const priceUSD = parseFloat(pair.priceUsd);
+        const mcap = pair.fdv ?? pair.marketCap ?? null;
+        const liquidity = pair.liquidity?.usd ?? null;
 
         const fmt = (n, decimals = 2) =>
           n < 0.01 ? n.toExponential(2) : n.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
         document.getElementById("stat-price").textContent = `$${fmt(priceUSD, 6)}`;
-        document.getElementById("stat-mcap").textContent = `$${fmt(mcap)}`;
-        document.getElementById("stat-liquidity").textContent = `$${fmt(liquidity)}`;
+        document.getElementById("stat-mcap").textContent = mcap != null ? `$${fmt(mcap)}` : "—";
+        document.getElementById("stat-liquidity").textContent = liquidity != null ? `$${fmt(liquidity)}` : "—";
 
         document.querySelectorAll(".stat-value").forEach(el => el.classList.remove("loading"));
       } catch (e) {
